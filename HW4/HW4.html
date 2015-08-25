@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>HW4</title>
+        <!-- </body> -->
+        <script type="text/javascript">
+            var xmlDoc;
+            function generateHTML(xmlDoc)
+            {  
+                ELEMENT_NODE = 1;    // MS parser doesn't define Node.ELEMENT_NODE
+                root=xmlDoc.DocumentElement;
+                html_text="<html><head><title>XML Parse Result</title></head><bo"+"dy><h1>Real Estate Lisings</h1><table border='2'>";
+                houses=xmlDoc.getElementsByTagName("Listing");
+                for(i=0;i<houses.length;i++) //do for all listings
+                {
+                    houseinfolist=houses.item(i).childNodes; //get properties of a house
+                    html_text+="<tr><td colspan='7' align=center><b>Listing</b></td></tr>";      //start a new row to print "Listing"
+                    for(j=0;j<houseinfolist.length;j++) //do for 'Location' and 'ListingDetails'
+                    {
+                        if(houseinfolist.item(j).nodeType==ELEMENT_NODE)
+                        {
+                            detailinfolist=houseinfolist.item(j).childNodes;
+                            if(houseinfolist.item(j).nodeName=="ListingDetails")    
+                                html_text+="<tr><td align=center><b>Details</b></td>";
+                            else
+                                html_text+="<tr><td align=center><b>"+houseinfolist.item(j).nodeName+"</b></td>";
+                            for(k=0;k<detailinfolist.length;k++) //start a new line to output headers
+                            {
+                                if(detailinfolist.item(k).nodeType==ELEMENT_NODE)                                
+                                {
+                                    header=detailinfolist.item(k).nodeName;
+                                    if(header=="StreetAddress")    
+                                        header="Street";
+                                    if(header=="ListingUrl")    
+                                        header="Listing URL";
+                                    if(header=="Image")
+                                        html_text+="<td colspan='3' align=center><b>"+header+"</b></td>";
+                                    else
+                                        html_text+="<td align=center><b>"+header+"</b></td>";
+                                }
+                            }
+                            html_text+="</tr><tr><td>&nbsp</td>";
+                            for(k=0;k<detailinfolist.length;k++) //start a new line to output values
+                            {
+                                if(detailinfolist.item(k).nodeType==ELEMENT_NODE)
+                                {
+                                    if(detailinfolist.item(k).nodeName=="ListingUrl")
+                                        html_text+="<td nowrap><a href='"+detailinfolist.item(k).firstChild.nodeValue+"'>Link to listing</a></td>";
+                                    else if(detailinfolist.item(k).nodeName=="Image")
+                                        html_text+="<td colspan='3'><img src='"+detailinfolist.item(k).firstChild.nodeValue+"' width='200' height='160'></td>";
+                                    else
+                                        html_text+="<td nowrap>"+detailinfolist.item(k).firstChild.nodeValue+"</td>";
+                                }
+                            }
+                            html_text+="</tr>";
+                        }
+                    }
+                    html_text+="</tr>";
+                }
+                html_text+="</table><noscript></bo"+"dy></html>"; 
+            }
+            function viewXML(what)
+            {
+                function loadXML(url) 
+                {
+                    xmlhttp=new XMLHttpRequest();   
+                    xmlhttp.open("GET",url,false); //open, send, responseXML are
+                    xmlhttp.send(); //properties of XMLHTTPRequest
+                    xmlDoc=xmlhttp.responseXML;
+                    return xmlDoc;
+                }
+                var URL = what.URL.value;
+                if(URL=="")//show alert for empty URL
+                    alert("Empty URL!");
+                else
+                {
+                    xmlDoc=loadXML(URL);
+                    if(xmlDoc==null)
+                        alert("Invalid URL!");
+                    else
+                    {
+                        xmlDoc.onload=generateHTML(xmlDoc);
+                        if (xmlDoc.documentElement.nodeName=="parsererror")
+                            alert("Error in XML file!");
+                        else
+                        {
+                            if(xmlDoc.documentElement.childElementCount == 0)
+                                alert("XML file containing NO real estate listings!");
+                            else
+                            {
+                                hWin = window.open("", "Assignment4", "height=800,width=800,scrollbars=yes");
+                                hWin.document.write(html_text);
+                                hWin.document.close();
+                            }
+                        }
+                    }                    
+                }  
+            }            
+        </script>
+    </head>
+    <body>
+        <center>
+            <br><br><br>
+            <b>Enter URL for Real Estate Catalog XML File</b><br><br>
+            <form name="myform" method="POST" id="location">
+            <input type="text" name="URL" maxlength="255" size="20"/>
+            <br/><br/>
+            <input type="button" name="submit" value="Submit Query" onClick="viewXML(this.form)"/>
+            </form>
+        </center>
+        <noscript>
+    </body>
+</html>

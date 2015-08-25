@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>HW4</title>
+    </head>
+    <body>
+        <script type="text/javascript">
+            var xmlDoc;
+            function generateHTML(xmlDoc)
+            {  
+                ELEMENT_NODE = 1;    // MS parser doesn't define Node.ELEMENT_NODE
+                root=xmlDoc.DocumentElement;
+                html_text="<html><head><title>XML Parse Result</title></head><body><h1>Real Estate Lisings</h1>";
+                html_text+="<table border='2'>";
+                houses=xmlDoc.getElementsByTagName("Listing");
+                html_text+="<tbody>";
+                for(i=0;i<houses.length;i++) //do for all listings
+                {
+                    houseinfolist=houses.item(i).childNodes; //get properties of a house
+                    html_text+="<tr><td colspan='7' align=center><b>Listing</b></td></tr>";      //start a new row to print "Listing"
+                    for(j=0;j<houseinfolist.length;j++) //do for 'Location' and 'ListingDetails'
+                    {
+                        if(houseinfolist.item(j).nodeType==ELEMENT_NODE)
+                        {
+                            detailinfolist=houseinfolist.item(j).childNodes;
+                            if(houseinfolist.item(j).nodeName=="ListingDetails")    
+                                html_text+="<tr><td align=center><b>Details</b></td>";
+                            else
+                                html_text+="<tr><td align=center><b>"+houseinfolist.item(j).nodeName+"</b></td>";
+                            for(k=0;k<detailinfolist.length;k++) //start a new line to output headers
+                            {
+                                if(detailinfolist.item(k).nodeType==ELEMENT_NODE)                                
+                                {
+                                    header=detailinfolist.item(k).nodeName;
+                                    if(header=="StreetAddress")    
+                                        header="Street";
+                                    if(header=="ListingUrl")    
+                                        header="Listing URL";
+                                    if(header=="Image")
+                                        html_text+="<td colspan='3' align=center><b>"+header+"</b></td>";
+                                    else
+                                        html_text+="<td align=center><b>"+header+"</b></td>";
+                                }
+                            }
+                            html_text+="</tr><tr><td>&nbsp</td>";
+                            for(k=0;k<detailinfolist.length;k++) //start a new line to output values
+                            {
+                                if(detailinfolist.item(k).nodeType==ELEMENT_NODE)
+                                {
+                                    if(detailinfolist.item(k).nodeName=="ListingUrl")
+                                        html_text+="<td nowrap><a href='"+detailinfolist.item(k).firstChild.nodeValue+"'>Link to listing</a></td>";
+                                    else if(detailinfolist.item(k).nodeName=="Image")
+                                        html_text+="<td colspan='3'><img src='"+detailinfolist.item(k).firstChild.nodeValue+"' width='200' height='160'></td>";
+                                    else
+                                        html_text+="<td nowrap>"+detailinfolist.item(k).firstChild.nodeValue+"</td>";
+                                }
+                            }
+                            html_text+="</tr>";
+                        }
+                    }
+                    html_text+="</tr>";
+                }
+                html_text+="</tbody>";  
+                html_text+="</table>";
+                html_text+="</body></html>"; 
+            }
+            function viewXML(what)
+            {
+                /*function loadXML(url) 
+                {
+                    xmlhttp=new XMLHttpRequest();   
+                    xmlhttp.open("GET",url,false); //open, send, responseXML are
+                    //document.write(xmlhttp.responseXML);
+                    if(xmlhttp.responseXML=="null")
+                    {
+                        alert(error);
+                    }
+                    xmlhttp.send(); //properties of XMLHTTPRequest
+                    
+                    xmlDoc=xmlhttp.responseXML;
+                    return xmlDoc;
+                }
+                function checkUrl(url) 
+                {
+                    var xmlhttp = false;
+                    xmlhttp = new XMLHttpRequest;
+                    if (xmlhttp) 
+                    {
+                        xmlhttp.open("GET", url);
+                        if (xmlhttp.status == 200)
+                            return true;
+                    }
+                    return false;
+                }*/
+                var URL = what.URL.value;
+                if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+       xmlhttp=new XMLHttpRequest();
+   }
+ else
+  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.open("GET",URL,false); //open, send, responseXML are
+  xmlhttp.send(null);                //properties of XMLHTTPRequest 
+  xmlDoc=xmlhttp.responseXML;
+
+
+if(!xmlDoc){
+alert("XML file is not existed");
+}
+else{
+generateHTML(xmlDoc); 
+ if(xmlDoc.documentElement.nodeName != "parsererror"){
+	 if(xmlDoc.documentElement.nodeName != "Listings"){
+			alert("containing NO real estate listings");
+			 
+			 }
+	 else{
+ hWin = window.open("", "Assignment4", "height=800,width=600,scrollbars=1"); 
+ hWin.document.write(html_text); 
+	 }
+ }
+                }  
+            }            
+        </script>
+    </body>
+    <body>
+        <br><br><br>
+        <center>
+            <b>Enter URL for Real Estate Catalog XML File</b><br><br>
+            <form name="myform" method="POST" id="location">
+            <input type="text" name="URL" maxlength="255" size="20"/>
+            <br/><br/>
+            <input type="button" name="submit" value="Submit Query" onClick="viewXML(this.form)"/>
+            </form>
+        </center>
+        <noscript>
+    </body>
+</html>
